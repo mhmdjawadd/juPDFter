@@ -5,7 +5,7 @@ import openai  # Import OpenAI to interact with the ChatGPT API
 
 # Initialize the Flask app and configure the database
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/dbname'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234@localhost/db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize SQLAlchemy
@@ -33,7 +33,7 @@ def chat_with_gpt():
         chat_response = openai.Completion.create(
             model="text-davinci-003",
             prompt=user_query,
-            max_tokens=50
+            max_tokens=4096
         )
 
         response_text = chat_response.choices[0].text.strip()
