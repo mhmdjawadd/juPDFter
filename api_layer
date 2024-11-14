@@ -1,0 +1,59 @@
+from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
+import openai  # Import OpenAI to interact with the ChatGPT API
+
+# Initialize the Flask app and configure the database
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://username:password@localhost/dbname'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize SQLAlchemy
+db = SQLAlchemy(app)
+
+# Define a model (modify as needed)
+class ChatRequest(db.Model):
+    __tablename__ = 'chat_requests'
+    id = db.Column(db.Integer, primary_key=True)
+    user_query = db.Column(db.String, nullable=False)
+    response = db.Column(db.String, nullable=True)
+
+# Route for handling requests to ChatGPT
+@app.route('/api/chat', methods=['POST'])
+def chat_with_gpt():
+    data = request.get_json()
+    user_query = data.get("query")
+
+    if not user_query:
+        return jsonify({"error": "No query provided"}), 400
+
+    # ChatGPT API interaction
+    try:
+        openai.api_key = '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'
+        chat_response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=user_query,
+            max_tokens=50
+        )
+
+        response_text = chat_response.choices[0].text.strip()
+
+        # Save the request and response in the database
+        chat_request = ChatRequest(user_query=user_query, response=response_text)
+        db.session.add(chat_request)
+        db.session.commit()
+
+        return jsonify({"response": response_text}), 200
+
+    except (SQLAlchemyError, Exception) as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# Initialize the database
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+# Run the app
+if __name__ == "__main__":
+    app.run(debug=True)
