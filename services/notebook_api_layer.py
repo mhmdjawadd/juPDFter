@@ -1,8 +1,8 @@
 from typing import Dict
 import requests
 from sqlalchemy.orm import Session
-from .models.notebook import Notebook
-from .database import get_db
+from ..juPDFter.models.notebook import Notebook
+from ..juPDFter.database import get_db
 
 
 class NotebookAPILayer:
