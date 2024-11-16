@@ -1,75 +1,79 @@
-from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
-import openai  
-import PyPDF2  
+from .file_processor import FileProcessor
+from typing import Dict, List
+import requests
 
-# Initialize the Flask app and configure the database
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:1234@localhost/db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize SQLAlchemy
-db = SQLAlchemy(app)
+class APILayer:
+    def __init__(self, api_key: str, storage_dir: str = "processed_files"):
+        self.api_key = api_key
+        self.file_processor = FileProcessor(storage_dir=storage_dir)
+        self.base_url = "https://api.openai.com/v1/chat/completions"
+        self.commands = self._load_commands()
 
-# Define a model (modify as needed)
-class ChatRequest(db.Model):
-    __tablename__ = 'chat_requests'
-    id = db.Column(db.Integer, primary_key=True)
-    user_query = db.Column(db.String, nullable=False)
-    response = db.Column(db.String, nullable=True)
+    def _load_commands(self) -> List[str]:
+        """Load commands from commands.txt file"""
+        try:
+            with open('commands.txt', 'r') as f:
+                return [line.strip() for line in f.readlines() if line.strip()]
+        except FileNotFoundError:
+            return ["Please extract topics from this text"]  # Default command if file not found
 
-# Route for handling requests to ChatGPT
-@app.route('/api/chat', methods=['POST'])
-def chat_with_gpt():
-    data = request.get_json()
-    user_query = data.get("query")
-    pdf_file = data.get("pdf_file")  # Expecting a PDF file in the request
+    def process_document(self, file_path: str) -> Dict:
+        # Process the file and extract text
+        process_result = self.file_processor.process_file(file_path)
+        
+        if process_result["status"] != "success":
+            return {"status": "error", "message": f"File processing failed: {process_result['message']}"}
 
-    if not user_query or not pdf_file:
-        return jsonify({"error": "No query or PDF file provided"}), 400
+        # Get the extracted text
+        text_result = self.file_processor.get_text(process_result["file_id"])
+        
+        if text_result["status"] != "success":
+            return {"status": "error", "message": f"Text retrieval failed: {text_result['message']}"}
 
-    # Read the PDF file
-    pdf_text = ""
-    try:
-        with open(pdf_file, 'rb') as file:
-            reader = PyPDF2.PdfReader(file)
-            for page in reader.pages:
-                pdf_text += page.extract_text() + "\n"
-    except Exception as e:
-        return jsonify({"error": f"Failed to read PDF: {str(e)}"}), 500
+        # Process each command and collect responses
+        all_responses = []
+        for command in self.commands:
+            response = self._send_to_api(text_result["text"], command)
+            if response["status"] == "success":
+                all_responses.append({
+                    "command": command,
+                    "response": response["response"]
+                })
+            else:
+                return response  # Return error if any command fails
 
-    # ChatGPT API interaction
-    try:
-        openai.api_key = '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'
-        messages = [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"Extract every topic found in the following text:\n\n{pdf_text}\n\nUser Query: {user_query}"}
-        ]
-        chat_response = openai.ChatCompletion.create(
-            model="gpt-4-turbo-128k",  # Using gpt-4-turbo
-            messages=messages,
-            max_tokens=100000  # Set to the maximum allowed tokens for gpt-4-turbo
-        )
+        return {
+            "status": "success",
+            "file_id": process_result["file_id"],
+            "responses": all_responses
+        }
 
-        response_text = chat_response['choices'][0]['message']['content'].strip()
+    def _send_to_api(self, text: str, command: str) -> Dict:
+        """Send text with specific command to OpenAI API"""
+        try:
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            prompt = f"{command}\n\nText: {text}"
+            
+            payload = {
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {"role": "system", "content": "You are a helpful assistant that processes documents according to specific commands."},
+                    {"role": "user", "content": prompt}
+                ]
+            }
 
-        # Save the request and response in the database
-        chat_request = ChatRequest(user_query=user_query, response=response_text)
-        db.session.add(chat_request)
-        db.session.commit()
+            response = requests.post(self.base_url, headers=headers, json=payload)
+            response.raise_for_status()
+            
+            return {
+                "status": "success",
+                "response": response.json()
+            }
 
-        return jsonify({"response": response_text.splitlines()}), 200  # Return response as a list of strings
-
-    except (SQLAlchemyError, Exception) as e:
-        db.session.rollback()
-        return jsonify({"error": str(e)}), 500
-
-# Initialize the database
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
-# Run the app
-if __name__ == "__main__":
-    app.run(debug=True)
+        except requests.exceptions.RequestException as e:
+            return {"status": "error", "message": f"API request failed: {str(e)}"}
