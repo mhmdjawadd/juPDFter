@@ -1,0 +1,11 @@
+"Analyze the following text and extract the main topic. Then, create a comprehensive Jupyter Notebook based on the extracted topic. The notebook should cover the topic in depth, and if examples are provided in the text, incorporate those examples where applicable.
+
+For the notebook, include the following:
+
+Title: A professional title reflecting the main topic.
+Introduction: A clear explanation of the topic's importance and relevance to software engineering.
+Code Implementation: If applicable, provide a code implementation related to the topic. The code should be well-commented and demonstrate the topic’s practical applications.
+Explanations and Concepts: Use Markdown to break down key concepts and terms, providing a clear explanation of the underlying principles.
+Examples or Use Cases: Include any examples or real-world applications mentioned in the text, showcasing how the topic is used in software development.
+Visualizations: Where relevant, include code output, architecture diagrams, or flowcharts (using placeholders if needed).
+Conclusion: Summarize the key points, and provide suggestions for further reading or resources on the topic.
