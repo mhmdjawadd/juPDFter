@@ -18,7 +18,7 @@ ALLOWED_EXTENSIONS = {'pdf', 'docx','txt'}
 with app.app_context():
     Base.metadata.create_all(bind=engine)
 
-api_key=''
+api_key='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'
 # Initialize LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)

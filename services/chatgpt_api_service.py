@@ -2,11 +2,10 @@ from typing import Dict
 import requests
 from sqlalchemy.orm import Session
 import os
-from services import NotebookService
+from .notebook_service import NotebookService
 from models import Notebook
 
 class ChatGPTAPIService:
-
     def __init__(self, api_key: str,user_id : int, db: Session = None):
         self.api_key = api_key
         self.user_id=user_id

@@ -1,7 +1,7 @@
 import os
 from werkzeug.datastructures import FileStorage
 import PyPDF2
-import docx
+from docx import Document
 class FileProcessorService:
     @staticmethod
     def process_file(file: FileStorage) -> str:
@@ -82,7 +82,7 @@ class FileProcessorService:
             ValueError: If extraction fails or contains no text.
         """
         try:
-            document = docx.Document(file.stream)
+            document = Document(file.stream)
             text = "\n".join([para.text for para in document.paragraphs])
             extracted_text = text.strip()
             if not extracted_text:
