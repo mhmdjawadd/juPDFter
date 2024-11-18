@@ -1,0 +1,7 @@
+Command to Extract Topics: Request ChatGPT to extract all the major topics. For example: "Extract all major topics, subtopics, or sections from this PDF." analyze headings, subheadings, or context to determine the key themes.
+
+Command for Summaries: create a 4-sentence summary for each topic. Example: "For each topic found, provide a 4-sentence summary explaining the content under that section."
+
+Request for Examples: To include examples, you can add: "Pull examples directly from the text under each topic to support the summary." 
+
+i want the output to be in bullet point format

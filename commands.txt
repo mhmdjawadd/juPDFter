@@ -1,7 +1,0 @@
-Load the PDF into ChatGPT: Share the PDF document by uploading it. Make sure you mention its purpose (e.g., "Analyze this document to extract topics and summarize them").
-
-Command to Extract Topics: Request ChatGPT to extract all the major topics. For example: "Extract all major topics, subtopics, or sections from this PDF." It will analyze headings, subheadings, or context to determine the key themes.
-
-Command for Summaries: Instruct ChatGPT to create a 4-sentence summary for each topic. Example: "For each topic found, provide a 4-sentence summary explaining the content under that section."
-
-Request for Examples: To include examples, you can add: "Pull examples directly from the text under each topic to support the summary." This ensures relevant and concise examples are provided for clarity.
