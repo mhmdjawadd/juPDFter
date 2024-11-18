@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
-from models import Notebook
+
 SQLALCHEMY_DATABASE_URL = "mssql+pyodbc://localhost\\SQLEXPRESS:1433/sql_express?driver=ODBC+Driver+17+for+SQL+Server"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
