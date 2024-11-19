@@ -21,7 +21,7 @@ with app.app_context():
     print("Initializing database from app.py")
     init_db()
 
-api_key="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"
+api_key=""
 # Initialize LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
