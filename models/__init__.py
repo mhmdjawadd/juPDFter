@@ -1,4 +1,3 @@
-from .base import Base
-from .notebook import Notebook
 from .user import User
-__all__ = ['Base', 'Notebook', 'User'] 
+from .notebook import Notebook
+__all__ = ['User','Notebook' ] 

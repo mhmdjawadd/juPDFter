@@ -4,4 +4,7 @@ Command for Summaries: create a 4-sentence summary for each topic. Example: "For
 
 Request for Examples: To include examples, you can add: "Pull examples directly from the text under each topic to support the summary." 
 
-i want the output to be in bullet point format
+for each topic ,  give a title consisting of two to three words. let this be the first words then follow it by a point and then continue as per the commands before.
+
+the output must be plain text with each topic seperated by a new line.
+

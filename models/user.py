@@ -1,18 +1,18 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from .base import Base
+from database import Base
 from flask_login import UserMixin
 
-class User(Base,UserMixin ):
+class User(Base,UserMixin):
     __tablename__ = 'UserTable'
     
     id = Column(Integer, primary_key=True)
     username = Column(String(50), unique=True)
     email = Column(String(120), unique=True)
-    password = Column(String(120))
+    password = Column(String(250))
     
     # Relationship with notebooks
-    notebooks = relationship("NotebookTable", back_populates="user", cascade="all, delete-orphan") 
+    notebooks = relationship("Notebook", back_populates="user", lazy=True) 
 
     def __repr__(self):
         return f"User(id={self.id}, username='{self.username}', email='{self.email}')" 

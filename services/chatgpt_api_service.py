@@ -2,7 +2,6 @@ from typing import Dict
 import requests
 from sqlalchemy.orm import Session
 import os
-from .notebook_service import NotebookService
 from models import Notebook
 
 class ChatGPTAPIService:
@@ -49,7 +48,7 @@ class ChatGPTAPIService:
             prompt = f"{wanted_prompt}\n\nText: {text}"
             
             payload = {
-                "model": "gpt-4-turbo-128k",
+                "model": "gpt-4o",
                 "messages": [
                     {"role": "system", "content": "You are a helpful assistant that processes documents according to specific commands."},
                     {"role": "user", "content": prompt}
@@ -138,7 +137,7 @@ class ChatGPTAPIService:
             
             
             # 3. Process each topic and create a notebook
-            topics = topics_response["topic_content"]
+            topics = topics_response["topics"]
             for topic in topics.split('\n'):  # Assuming topics are newline-separated
                 if not topic.strip():  # Skip empty lines
                     continue
@@ -148,8 +147,9 @@ class ChatGPTAPIService:
                 if notebook_response["status"] == "error":
                     continue
                 
+                title = topic.split('.')[0].strip()  # Get everything before the first period
                 # Create filename from topic (sanitize the topic string for filename)
-                safe_topic = "".join(c for c in topic if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                safe_topic = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
                 filename = f"{safe_topic}_{self.user_id}.ipynb"
                 
                 # Save notebook to user's directory
@@ -162,15 +162,14 @@ class ChatGPTAPIService:
                         topic=filename
                     )
                     
-                    NotebookService.save_notebook(self.db,self.user_id,notebook)
-                    
-                    
+                    self.db.add(notebook)
+                    self.db.commit()
+                
                 except Exception as e:
                     return {
                         "status": "error",
                         "message": f"Failed to save notebook for topic {topic}: {str(e)}"
                     }
-            
             # 4. Return success with list of created notebooks
             return {
                 "status": "success",

@@ -8,6 +8,8 @@ from flask_login import LoginManager, current_user, login_user, logout_user, log
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy import or_
 import re
+from pathlib import Path
+import nbformat
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
@@ -16,9 +18,10 @@ ALLOWED_EXTENSIONS = {'pdf', 'docx','txt'}
 
 # Initialize tables in the database
 with app.app_context():
-    Base.metadata.create_all(bind=engine)
+    print("Initializing database from app.py")
+    init_db()
 
-api_key='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'
+api_key="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"
 # Initialize LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -38,7 +41,7 @@ def allowed_file(filename):
 
 @app.route('/upload', methods=['POST'])
 @login_required
-def upload_file():
+def upload_file_and_create_notebooks():
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
     
@@ -58,20 +61,25 @@ def upload_file():
         try:
             # Process the file
             processor = FileProcessorService()
-            processed_content = processor.process_file(filepath)
+            processed_content = processor.process_file(file)
 
             # Initialize ChatGPT API and process content
             with get_db_context() as db:
                 chatgpt = ChatGPTAPIService(api_key,current_user.id,db)
                 response = chatgpt.process_text_and_create_notebooks(processed_content)
                  # Simply pass through the status and message from ChatGPTAPIService
-                return jsonify(response), 200 if response['status'] == 'success' else jsonify(response), 500
+                if response['status'] == 'success':
+                    return jsonify(response), 200 
+                else:
+                    return jsonify(response), 500
 
-
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to process file: {str(e)}'
+            }), 500
         finally:
-            # Clean up uploaded file
-            if os.path.exists(filepath):
-                os.remove(filepath)
+            pass
 
     return jsonify({
         'status': 'error',
@@ -119,7 +127,8 @@ def login():
                 return jsonify({
                     'status': 'success',
                     'message': 'Logged in successfully'
-                })
+                }),200
+
     
         return jsonify({
                 'status': 'error',
@@ -139,36 +148,43 @@ def signup():
         # Check if all required fields are present
         required_fields = ['username', 'email', 'password']
         if not all(field in data for field in required_fields):
+            
             return jsonify({
                 'status': 'error',
                 'message': 'Missing required fields'
             }), 400
-
+        
         username = data['username']
         email = data['email']
         password = data['password']
 
         # Validate email format
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            
             return jsonify({
                 'status': 'error',
                 'message': 'Invalid email format'
             }), 400
-
+        
         # Check if username or email already exists
         with get_db_context() as db:
+            
             existing_user = db.query(User).filter(
                 or_(User.username == username, User.email == email)
             ).first()
             
             if existing_user:
+                
                 return jsonify({
                     'status': 'error',
                     'message': 'Username or email already exists'
                 }), 400
 
             # Create new user
+            
             hashed_password = generate_password_hash(password)
+            
+            
             new_user = User(
                 username=username,
                 email=email,
@@ -176,14 +192,16 @@ def signup():
             )
             
             db.add(new_user)
+            
             db.commit()
-
+            
         return jsonify({
             'status': 'success',
             'message': 'User registered successfully'
         }), 201
 
     except Exception as e:
+        print(f"Registration failed: {str(e)}")
         return jsonify({
             'status': 'error',
             'message': f'Registration failed: {str(e)}'
@@ -205,6 +223,80 @@ def logout():
             'status': 'error',
             'message': f'Logout failed: {str(e)}'
         }), 500
+
+@app.route('/download-notebooks', methods=['GET'])
+@login_required
+def download_notebooks():
+    try:
+        with get_db_context() as db:
+            # Get current user's notebooks
+            notebooks = NotebookService.get_notebooks(db, current_user.id)
+            
+            if not notebooks:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'No notebooks found'
+                }), 404
+
+            # Create downloads directory
+            downloads_path = Path.home() / 'Downloads' / 'juPDFter_notebooks'
+            downloads_path.mkdir(parents=True, exist_ok=True)
+
+            saved_files = []
+            for notebook in notebooks:
+                try:
+                    # Create a new notebook using nbformat
+                    nb = nbformat.v4.new_notebook()
+                    
+                    # Convert the content string to markdown cells
+                    # Split content by newlines to create separate cells
+                    content_lines = notebook.content.split('\n')
+                    cells = []
+                    
+                    current_cell = []
+                    for line in content_lines:
+                        if line.startswith('#'):  # New section starts
+                            if current_cell:  # Save previous cell if exists
+                                cells.append(nbformat.v4.new_markdown_cell('\n'.join(current_cell)))
+                                current_cell = []
+                        current_cell.append(line)
+                    
+                    # Add the last cell if exists
+                    if current_cell:
+                        cells.append(nbformat.v4.new_markdown_cell('\n'.join(current_cell)))
+                    
+                    nb['cells'] = cells
+
+                    # Save notebook
+                    notebook_path = downloads_path / notebook.topic
+                    with open(notebook_path, 'w', encoding='utf-8') as f:
+                        nbformat.write(nb, f)
+                    
+                    saved_files.append(notebook.topic)
+                
+                except Exception as e:
+                    print(f"Error processing notebook {notebook.topic}: {str(e)}")
+                    continue
+
+            if not saved_files:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Failed to save any notebooks'
+                }), 500
+
+            return jsonify({
+                'status': 'success',
+                'message': 'Notebooks downloaded successfully',
+                'saved_files': saved_files,
+                'download_path': str(downloads_path)
+            })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Failed to download notebooks: {str(e)}'
+        }), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
 

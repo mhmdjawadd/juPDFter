@@ -1,4 +1,4 @@
-"Analyze the following text and extract the main topic. Then, create a comprehensive Jupyter Notebook based on the extracted topic. The notebook should cover the topic in depth, and if examples are provided in the text, incorporate those examples where applicable.
+Analyze the following text and extract the main topic. Then, create a comprehensive Jupyter Notebook based on the extracted topic. The notebook should cover the topic in depth, and if examples are provided in the text, incorporate those examples where applicable
 
 For the notebook, include the following:
 
