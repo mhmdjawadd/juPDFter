@@ -1,0 +1,42 @@
+From the provided PDF, please follow these steps to analyze and generate a comprehensive output:
+
+1) Extract the topics: 
+
+- Extract all major topics, subtopics, and examples mentioned in the PDF, ensuring that no topics are missed.
+- For each page, extract the main topic and ensure you capture every significant topic from the entire document.
+- Analyze the relationships between topics to ensure the flow is coherent, noting how each topic relates to or builds upon the previous one.
+- Keep the topics in chronological order as they appear in the document.
+- For each topic, classify whether it is a major topic, a subtopic, or an example.
+- Group the topics into sections based on their relationships, organizing them into key themes.
+- Identify the overall main topic of the PDF, and provide a brief summary of this main topic based on the extracted sections.
+
+
+2) Summarize each topic:
+
+- For each topic, provide a concise but comprehensive summary that captures the key points.
+- Ensure the summary is clear, reflecting the main concepts discussed in each topic.
+- If the topic includes examples or case studies, briefly mention them to illustrate the practical applications of the concepts.
+- Focus on the relevance of the topic within the broader context of the document.
+- Format each summary clearly with the topic title (2-3 words) followed by the summary.
+
+3) Provide examples for each topic:
+
+- For each extracted topic, If examples or case studies are mentioned in the text, mention them briefly in the summary to show their relevance to the topic. These examples should illustrate practical applications of the topic.
+- If no examples or case studies are explicitly mentioned in the PDF, generate relevant examples based on your knowledge. The generated examples should be applicable to the subject matter and clarify the concepts discussed.
+- Make it clear if the examples are based on your knowledge and not directly from the text.
+- Ensure the examples are clearly related to the topic and help enhance understanding.
+
+4) Formatting:
+
+- Topic Title: For each topic, provide a clear title consisting of 2-3 words, followed by the summary and examples.
+- Ensure each topic is followed by its own summary and examples. Do not leave out any topics, and ensure each one is fully addressed.
+- Spacing: Separate each topic’s output with a new line to improve readability.
+Additional Instructions:
+
+Double-check that no topics are missed, and ensure that all relevant topics and examples from the PDF are included.
+
+Please ensure that the final output is well-organized and clear, with appropriate categorization of major topics, subtopics, and examples. The output should be in plain text format. Do not mention the steps I provided in your output explicitly.
+
+The output should have a form of:
+
+Main overall idea + summary, line space, major topic 1 + summary + example, line space, in a subheading list all the subtopics of this major topic + give the summary and example of this with a line space between them all. Then do the same for all major topics.
