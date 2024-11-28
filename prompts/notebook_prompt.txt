@@ -1,6 +1,8 @@
-Using the extracted topics from the PDFs, along with their summaries and corresponding sections, create a comprehensive Jupyter Notebook (.ipynb format) that solves a problem related to the main topic of the PDF. The notebook should demonstrate the application of the concepts and cover the major topics and subtopics through coding problems that are solved step by step, showing their functionalities in action.
+Using the extracted topics from the PDFs, along with their summaries and corresponding sections, create a comprehensive Jupyter Notebook (.ipynb format) that solves problems related to the each major topic of the PDF in the scope of the main topic of the PDF. The notebook should demonstrate the application of the concepts and cover the major topics and subtopics through coding problems that are solved step by step, showing their functionalities in action.
 
-The goal of this notebook is to allow hands-on experience with the main topic of the PDF by solving a well-defined exercise or real-world problem. The notebook will be organized in steps that directly relate to the major topics, with each step involving code implementation to show how the concepts work.
+The goal of this notebook is to allow hands-on experience with the main topic of the PDF by solving a well-defined exercises or real-world problems. The notebook will be organized in steps that directly relate to the major topics, with each step involving code implementation to show how the concepts work.
+
+The output should just be the downloadable Jupyter notebook using a .ipynb extension. 
 
 For the notebook, please follow this structure:
 
