@@ -1,15 +1,15 @@
-Using the extracted topics from the PDFs, along with their summaries and corresponding sections, create a comprehensive Jupyter Notebook (.ipynb format) that solves problems related to the each major topic of the PDF in the scope of the main topic of the PDF. The notebook should demonstrate the application of the concepts and cover the major topics and subtopics through coding problems that are solved step by step, showing their functionalities in action.
+Using the extracted topics from the PDFs, along with their summaries and corresponding sections, create a detailed and comprehensive Jupyter Notebook (.ipynb format) that solves problems related to each major topic of the PDF in the scope of the main topic of the PDF. The notebook should demonstrate the application of concepts, covering the major topics and subtopics with detailed coding problems. These problems must be divided into small, well-explained steps, with extensive use of code to show the functionalities and logic in action.
 
-The goal of this notebook is to allow hands-on experience with the main topic of the PDF by solving a well-defined exercises or real-world problems. The notebook will be organized in steps that directly relate to the major topics, with each step involving code implementation to show how the concepts work.
+The goal of this notebook is to provide hands-on experience with the main topic of the PDF by solving clearly defined exercises or real-world problems for each major topic, divided into multiple steps. The notebook must include extensive coding cells for each major topic, ensuring that every aspect of the topic is well-addressed.
 
-The output should just be the downloadable Jupyter notebook using a .ipynb extension. 
+The output should just be the downloadable Jupyter Notebook in .ipynb format.
 
 For the notebook, please follow this structure:
 
 1) Main Section: Title and Introduction:
 - Title: Provide a professional and descriptive title that reflects the main topic of the PDF.
 - Introduction: In this section, provide a high-level overview of the problem being solved. Explain the overall topic and its relevance to the broader field (especially software engineering).
-- State the problem or challenge that the notebook will solve and give a preview of the key concepts and major topics that will be used to solve this problem. Emphasize how these topics will guide the solution step by step.
+- State the Challenges: Define the problems or challenges that the notebook will solve. Highlight how the notebook will address each major topic with detailed steps and code implementations.
 
 2) Main Sections (For Each Major Topic):
 For each major topic identified from the PDF, create a separate section in the notebook. Each section should follow this structure:
@@ -17,21 +17,35 @@ For each major topic identified from the PDF, create a separate section in the n
 - Title: Give the section a clear title based on the major topic extracted.
 - Description/Context: At the beginning of the section, provide a brief explanation of the major topic in the context of solving the problem. How does this topic fit into the overall solution, and why is it important?
 
-3) Subtopics and Code Implementation:
+3) Subtopics with Detailed Code Implementation:
 For every subtopic within the major topic:
 
-- Explanation of Functionality: Before the code block, explain the functionality that will be used in the context of the problem. For example:
-df.info(): "The df.info() function is used to display a concise summary of a DataFrame, showing the number of entries, column names, data types, and non-null values for each column. This is helpful for understanding the structure of the dataset before starting any data manipulation."
+- Explanation of Functionality: Before the code block, explain the functionality that will be used in the context of the problem. 
+For example:
+df.info(): "The df.info() function is used to display a concise summary of a DataFrame, showing the number of entries, column names, data types, and non-null values for each column. This helps understand the structure of the dataset before starting any data manipulation."
 
-- Code Implementation: Under the explanation, provide the code implementation that demonstrates how the functionality is applied to solve the problem. For example:
-# Display concise summary of the DataFrame
-df.info()
+- Step-by-Step Code Implementation: Divide the problem into multiple steps, each with its own clearly commented code cell. The comments should:
+    - Explain what the code does.
+    - Describe how each step contributes to solving the problem.
+    - Clarify why specific methods or approaches are used.
+- For each subtopic, implement practical problems relevant to the concepts. For instance:
+  - Forward Propagation: Demonstrate how to compute the output of a layer in a simple neural network using Python.
+  - Regularization: Implement L2 regularization on weights and show its effect on model overfitting.
 
-- Comment the Code: Make sure the code is well-commented to explain what each line is doing, how it applies to the problem, and the purpose of each step.
+- Comment the Code: Make sure the code is well-commented to explain what each line is doing, how it applies to the problem, and the purpose of each step.Each coding exercise should include:
+  - Explanation of the mathematical foundation behind the concept.
+  - Use of small, synthetic datasets for simplicity.
+  - Testing the implementation to validate its correctness.
 
 4) Examples and Use Cases:
-- For each major topic or subtopic, include relevant examples (either from the PDF or generated) that demonstrate how the functionality works in the context of the problem.
-- If the PDF does not provide examples, generate examples based on your understanding of the topic, and apply them directly to the code to showcase how the concept is used in solving the problem.
+- Create examples based on real-world scenarios. 
+For instance:
+  - Backpropagation: Implement gradient descent on a small neural network and show the reduction in error.
+  - Data Augmentation: Programmatically generate augmented data from a given dataset of images.
+- These examples should:
+  - Be realistic and relevant.
+  - Be implemented in code, with explanations for each step.
+
 
 5) Visualizations:
 - Where relevant, generate visualizations (e.g., plots, graphs, or charts) that support the concepts being explained or illustrate the result of the code implementation.
@@ -44,9 +58,12 @@ df.info()
 
 7) Formatting and Structure:
 - Each section (major topic and subtopics) should be clearly defined using Markdown headers and subheaders to make the notebook easy to navigate.
-- The code should be formatted as separate cells in the Jupyter notebook, so it can be executed interactively. Each code block should be followed by a Markdown explanation to describe its functionality.
-- Use Markdown to explain each function, its purpose, and how it fits into solving the problem at hand. Ensure that all explanations come before the corresponding code block.
-- Ensure that the notebook is well-organized and each section logically builds on the previous one, providing a clear path from problem definition to solution.
+- The code should be formatted as separate cells in the Jupyter notebook, so it can be executed interactively. 
+- Ensure that all explanations come before the corresponding code block.
+- Ensure that the notebook is well-organized and each section logically builds on the previous one, providing a clear path from problem definition to solution. Ensure the notebook builds progressively, guiding users from basic to advanced concepts in logical steps.
+- Each section should tackle distinct challenges or concepts related to the major topic. Avoid reusing code for similar purposes across different sections unless explicitly required.
+- Make sure every problem is divided into small chronological steps, and explain every part of the divided problem before the code. 
+
 
 Example of How the Output Should Be Structured:
 Main Section: Overview
