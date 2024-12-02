@@ -106,3 +106,19 @@ body{
 .toggle-form:hover {
   text-decoration: underline;
 }
+
+
+.logout-button {
+  margin: 10px;
+  padding: 10px 15px;
+  background-color: #960aa3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.logout-button:hover {
+  background-color: #df7ada;
+}
