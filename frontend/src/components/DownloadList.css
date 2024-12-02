@@ -1,0 +1,47 @@
+/* src/components/DownloadList.css */
+
+.download-list-container {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.download-list-heading {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #960aa3
+}
+
+.no-notebooks {
+  margin-left: 5rem;
+}
+
+.notebook-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.notebook-item {
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+.download-link {
+  color: #3175be;
+  text-decoration: none;
+  font-weight: bold;
+  border: 1px solid #3175be;
+  padding: 0.3rem 1rem;
+  border-radius: 5px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.download-link:hover {
+  background-color: #3175be;
+  color: #fff;
+}
