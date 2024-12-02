@@ -1,6 +1,14 @@
 Objective:
 Using the topics, summaries, and sections from the provided PDF, create a detailed Jupyter Notebook (.ipynb format) that offers hands-on coding exercises aligned with the main topic. Each problem should be divided into small, well-explained steps, with each code cell addressing one specific task.
 
+Generation:
+tip: use one problem at a time to make sure the output is correct. 
+1) Examine all the major topics extracted and generate a problem(code) for each. 
+2) Store each problem(code) in your memory 
+3) Divide every problem(code) into themes. ex: data preprocessing, training the model 
+4) Divde each theme into subtasks, making sure the problem (code) is also divided.
+5) Use these subtasks codes in the notebook.
+
 Structure:
 
 1) Title and Introduction:
