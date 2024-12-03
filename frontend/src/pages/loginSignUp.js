@@ -3,22 +3,26 @@ import "./loginSignUp.css";
 
 const LoginSignup = ({ setIsAuthenticated }) => {
   const [isSignUp, setIsSignUp] = useState(false);
+  console.log("handleSubmit triggered"); // Debug
   const handleSubmit = (e) => {
     e.preventDefault();
 
     // Extract form values
     const username = e.target[0].value;
-    const password = isSignUp ? e.target[1].value : null; // Email is required only for signup
-    const email = isSignUp ? e.target[2].value : e.target[1].value;
+    const password = isSignUp ? e.target[2].value : e.target[1].value;
+    const email = isSignUp ? e.target[2].value : null; // Email is required only for signup
     // Set the URL based on the operation (signup or login)
     const url = isSignUp ? "/signup" : "/login";
-
     // Construct the request body
     const body = isSignUp
       ? { username, email, password }
       : { username, password };
 
-    // Call the backend API
+    // Call the backend API delete later
+    console.log("Form Data Sent:", body); // Debug
+    console.log("Sending request to:", url, "with body:", body); // Debug
+    console.log("Form values:", { username, password });
+
     fetch(`http://localhost:5000${url}`, {
       method: "POST",
       headers: {
