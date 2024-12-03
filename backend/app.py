@@ -10,8 +10,11 @@ from sqlalchemy import or_
 import re
 from pathlib import Path
 import nbformat
+from flask_cors import CORS
+
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
 app.config['UPLOAD_FOLDER'] = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf', 'docx','txt'}
@@ -21,7 +24,7 @@ with app.app_context():
     print("Initializing database from app.py")
     init_db()
 
-api_key=""
+api_key="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"
 # Initialize LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -119,6 +122,7 @@ def login():
                 'status': 'error',
                 'message': 'Missing username or password'
             }), 400
+        
         with get_db_context() as db:
             user = db.query(User).filter_by(username=data['username']).first()
             
@@ -144,11 +148,12 @@ def login():
 def signup():
     try:
         data = request.get_json()
+        print(data)
         
         # Check if all required fields are present
         required_fields = ['username', 'email', 'password']
         if not all(field in data for field in required_fields):
-            
+            print("Missing required fields")
             return jsonify({
                 'status': 'error',
                 'message': 'Missing required fields'
@@ -159,12 +164,13 @@ def signup():
         password = data['password']
 
         # Validate email format
-        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            
-            return jsonify({
-                'status': 'error',
-                'message': 'Invalid email format'
-            }), 400
+
+        # if not re.match(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', email):
+        #     print("Invalid email format")
+        #     return jsonify({
+        #         'status': 'error',
+        #         'message': 'Invalid email format'
+        #     }), 400
         
         # Check if username or email already exists
         with get_db_context() as db:
@@ -174,7 +180,7 @@ def signup():
             ).first()
             
             if existing_user:
-                
+                print("Username or email already exists")
                 return jsonify({
                     'status': 'error',
                     'message': 'Username or email already exists'
@@ -194,6 +200,7 @@ def signup():
             db.add(new_user)
             
             db.commit()
+            login_user(new_user)
             
         return jsonify({
             'status': 'success',
@@ -296,6 +303,15 @@ def download_notebooks():
             'status': 'error',
             'message': f'Failed to download notebooks: {str(e)}'
         }), 500
+
+#############to fix later################
+progress_data = {"status": "Processing", "progress": 0}  # Simulated progress data
+
+@app.route('/process', methods=['GET'])
+def process_status():
+    global progress_data
+    return jsonify(progress_data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

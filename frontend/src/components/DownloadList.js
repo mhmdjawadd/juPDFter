@@ -10,8 +10,9 @@ const DownloadList = () => {
     // Fetch the list of downloadable notebooks from the backend
     const fetchNotebooks = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/download/list");
-        setNotebooks(response.data);
+        // const response = await axios.get("http://localhost:5000/notebooks");
+        console.log("Fetching notebooks...");
+        // setNotebooks(response.data.data); // Adjust based on the backend response structure
       } catch (error) {
         console.error("Error fetching notebooks:", error);
       }
@@ -28,7 +29,7 @@ const DownloadList = () => {
           {notebooks.map((notebook, index) => (
             <li key={index} className="notebook-item">
               <a
-                href={`http://localhost:5000${notebook.path}`}
+                href={`http://localhost:5000/download-notebooks/${notebook.id}`}
                 className="download-link"
                 download
               >
