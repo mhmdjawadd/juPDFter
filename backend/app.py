@@ -109,14 +109,27 @@ def get_notebooks():
             'status': 'error',
             'message': f'Failed to retrieve notebooks: {str(e)}'
         }), 500
-
-
-login_manager.login_view = 'login'  # Specify which route handles login
-
+  
+login_manager.login_view = 'login'
 @app.route('/login', methods=['POST'])
 def login():
+    print("Login request received")  # Debugging
     try:
         data = request.get_json()
+        print("Received data:", data)  # Debugging
+        required_fields = ['username', 'password']
+        if not all(field in data for field in required_fields):
+            print("Missing required fields")
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required fields'
+            }), 400
+        if not data['password']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Password cannot be empty'
+            }), 400
+        # Validate incoming data
         if not data or 'username' not in data or 'password' not in data:
             return jsonify({
                 'status': 'error',
@@ -124,21 +137,31 @@ def login():
             }), 400
         
         with get_db_context() as db:
+            # Query for the user by username
             user = db.query(User).filter_by(username=data['username']).first()
             
-            if user and check_password_hash(user.password, data['password']):
+            # Check if the user exists
+            if not user:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'User not found'
+                }), 404
+            
+            # Verify the password
+            if check_password_hash(user.password, data['password']):
                 login_user(user)
                 return jsonify({
                     'status': 'success',
                     'message': 'Logged in successfully'
-                }),200
-
-    
+                }), 200
+            
+        # If the password is incorrect
         return jsonify({
-                'status': 'error',
-                'message': 'Invalid username or password'
-            }), 401
+            'status': 'error',
+            'message': 'Invalid username or password'
+        }), 401
     except Exception as e:
+        print(f"Login failed: {str(e)}")  # Debug: Print the exception
         return jsonify({
             'status': 'error',
             'message': f'Login failed: {str(e)}'
