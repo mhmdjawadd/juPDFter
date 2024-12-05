@@ -14,7 +14,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, supports_credentials=True)
 app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
 app.config['UPLOAD_FOLDER'] = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf', 'docx','txt'}
@@ -113,10 +113,8 @@ def get_notebooks():
 login_manager.login_view = 'login'
 @app.route('/login', methods=['POST'])
 def login():
-    print("Login request received")  # Debugging
     try:
         data = request.get_json()
-        print("Received data:", data)  # Debugging
         required_fields = ['username', 'password']
         if not all(field in data for field in required_fields):
             print("Missing required fields")

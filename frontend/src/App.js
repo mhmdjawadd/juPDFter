@@ -12,6 +12,7 @@ function App() {
   // Logout function
   const handleLogout = async () => {
     try {
+      console.log("Sending logout request...");
       const response = await axios.post('http://localhost:5000/logout', {}, { withCredentials: true });
       if (response.data.status === 'success') {
         setIsAuthenticated(false); // Update authentication state
