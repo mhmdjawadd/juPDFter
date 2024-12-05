@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify, make_response
-import os
+from flask import Flask, request, jsonify
 import datetime
 from functools import wraps
 from database import *
@@ -73,13 +72,20 @@ def login():
     password = auth.get('password')
 
     if not username or not password:
-        return make_response('Could not verify', 401)
+        return jsonify({
+    'status': 'error',
+    'message': 'Could not verify'
+}), 401
+
 
     with get_db_context() as db:
         user = db.query(User).filter_by(username=username).first()
 
     if not user:
-        return make_response('User not found', 401)
+        return jsonify({
+    'status': 'error',
+    'message': 'User not found'
+}), 401
 
     if check_password_hash(user.password, password):
         token = jwt.encode({
@@ -89,7 +95,10 @@ def login():
 
         return jsonify({'token': token})
 
-    return make_response('Could not verify', 401)
+    return jsonify({
+    'status': 'error',
+    'message': 'Could not verify'
+}), 401
 
 # File upload and notebook creation route
 @app.route('/upload', methods=['POST'])
