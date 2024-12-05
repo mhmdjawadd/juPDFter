@@ -3,6 +3,7 @@ import requests
 from sqlalchemy.orm import Session
 import os
 from models import Notebook
+import nbformat
 
 class ChatGPTAPIService:
     def __init__(self, api_key: str,user_id : int, db: Session = None):
@@ -47,10 +48,19 @@ class ChatGPTAPIService:
             
             prompt = f"{wanted_prompt}\n\nText: {text}"
             
+            system_prompt = (
+            "You are an expert educator and data scientist specializing in creating detailed and comprehensive "
+            "Jupyter notebooks for advanced topics. When provided with a topic, you generate a well-structured "
+            "notebook that includes explanations, code examples, data visualizations, and exercises. Ensure that "
+            "**the first sentence of the notebook is the title**. "
+            "Make sure the notebook is thorough, suitable "
+            "for graduate-level studies, and covers the topic in depth."
+        )
+
             payload = {
                 "model": "gpt-4o",
                 "messages": [
-                    {"role": "system", "content": "You are a helpful assistant that processes documents according to specific commands."},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ]
             }
@@ -65,30 +75,6 @@ class ChatGPTAPIService:
 
         except requests.exceptions.RequestException as e:
             return {"status": "error", "message": f"API request failed: {str(e)}"}
-
-    def _get_notebook(self, topic: str) -> Dict:
-        """Get Jupyter notebook content """
-        # 1. Send to API and get JSON response
-        response = self._send_to_api(topic, self.notebook_prompt)
-        
-        if response["status"] == "error":
-            return response
-        
-        try:
-            # 2. Extract the notebook JSON from the nested API response
-            notebook_content = response["response"]["choices"][0]["message"]["content"]
-            
-            # 3. Return the notebook content for further processing
-            return {
-                "status": "success",
-                "notebook_content": notebook_content
-            }
-            
-        except (KeyError, IndexError) as e:
-            return {
-                "status": "error",
-                "message": f"Failed to extract notebook content: {str(e)}"
-            }
 
     def _get_topics(self, file_content: str) -> Dict:
         """Get main topics from the text
@@ -119,67 +105,159 @@ class ChatGPTAPIService:
                 "message": f"Failed to extract topics: {str(e)}"
             }
 
-    def process_text_and_create_notebooks(self, text: str) -> Dict:
-        """Process text to extract topics and create notebooks for each topic
-        Args:
-            text (str): Text to process , it is gicen as a file parsed format
-            user_id (int): Current user's ID
-        Returns:
-            Dict: Status and list of created notebooks
-        """
+    def _get_subtopics(self, topic: str) -> Dict:
+        """Get subtopics from a main topic."""
+        # Define a prompt to extract subtopics
+        subtopic_prompt = (
+            f"I have a topic about {topic}. I want you to give me an output in text where you provide "
+            "subtopics about the topic I just gave you, so that I can include it in a Jupyter notebook "
+            "where it would be easier for learners to learn from. Remember, no .ipynb files; I just want the topics."
+            "i want the text to be seperated by a new line and be raw text only"
+        )
 
-        # 1. Get topics from text
+        response = self._send_to_api("", subtopic_prompt)
+
+        if response["status"] == "error":
+            return response
+
+        try:
+            # Extract the subtopics from the API response
+            subtopics_content = response["response"]["choices"][0]["message"]["content"]
+
+            # Return the subtopics content
+            return {
+                "status": "success",
+                "subtopics": subtopics_content
+            }
+
+        except (KeyError, IndexError) as e:
+            return {
+                "status": "error",
+                "message": f"Failed to extract subtopics: {str(e)}"
+            }
+    
+    def _get_content_for_subtopic(self, topic: str, subtopic: str) -> Dict:
+        """Generate content for a subtopic within the given topic."""
+        content_prompt = (
+            f"Please provide an educational explanation on the subtopic '{subtopic}' under the main topic '{topic}'. "
+            "Include examples, especially those present in the original file, to illustrate the concepts. "
+            "The content should be suitable for inclusion in a Jupyter notebook cell for learners to understand easily."
+        )
+
+        response = self._send_to_api("", content_prompt)
+
+        if response["status"] == "error":
+            return response
+
+        try:
+            subtopic_content = response["response"]["choices"][0]["message"]["content"]
+            return {
+                "status": "success",
+                "content": subtopic_content
+            }
+
+        except (KeyError, IndexError) as e:
+            return {
+                "status": "error",
+                "message": f"Failed to extract content for subtopic: {str(e)}"
+            }
+
+    def _assemble_notebook(self, title: str, cells: list) -> nbformat.NotebookNode:
+        """Assemble notebook content using nbformat."""
+        nb = nbformat.v4.new_notebook()
+        nb_cells = []
+
+        # Add the title as the first cell
+        nb_cells.append(nbformat.v4.new_markdown_cell(f"# {title}"))
+
+        # Add the rest of the cells
+        for cell in cells:
+            if cell["type"] == "markdown":
+                nb_cells.append(nbformat.v4.new_markdown_cell(cell["content"]))
+            elif cell["type"] == "code":
+                nb_cells.append(nbformat.v4.new_code_cell(cell["content"]))
+
+        nb['cells'] = nb_cells
+        return nb
+
+    def _save_notebook(self, topic_title: str, notebook_content: nbformat.NotebookNode):
+        """Save the notebook content to the database."""
+        try:
+            notebook_json = nbformat.writes(notebook_content)
+
+            safe_topic = "".join(c for c in topic_title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+            filename = f"{safe_topic}_{self.user_id}.ipynb"
+
+            notebook = Notebook(
+                user_id=self.user_id,
+                content=notebook_json,
+                topic=filename
+            )
+
+            self.db.add(notebook)
+            self.db.commit()
+
+        except Exception as e:
+            raise Exception(f"Failed to save notebook for topic '{topic_title}': {str(e)}")
+
+    def process_text_and_create_notebooks(self, text: str) -> Dict:
+        """Process text to extract topics, subtopics, and create notebooks."""
         topics_response = self._get_topics(text)
         if topics_response["status"] == "error":
             return topics_response
-            
+
         try:
-            
-            
-            # 3. Process each topic and create a notebook
             topics = topics_response["topics"]
-            for topic in topics.split('\n'):  # Assuming topics are newline-separated
-                if not topic.strip():  # Skip empty lines
+            for topic_line in topics.split('\n'):
+                topic = topic_line.strip()
+                if not topic:
                     continue
-                    
-                # Get notebook for this topic
-                notebook_response = self._get_notebook(topic)
-                if notebook_response["status"] == "error":
+
+                # Extract the main topic title
+                topic_title = topic.split('.')[1].strip() if '.' in topic else topic
+
+                # Get subtopics for this topic
+                subtopics_response = self._get_subtopics(topic_title)
+                if subtopics_response["status"] == "error":
                     continue
-                
-                title = topic.split('.')[0].strip()  # Get everything before the first period
-                # Create filename from topic (sanitize the topic string for filename)
-                safe_topic = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
-                filename = f"{safe_topic}_{self.user_id}.ipynb"
-                
-                # Save notebook to user's directory
-                try:
-                    
-                    # Save notebook content and metadata using the service
-                    notebook = Notebook(
-                        user_id=self.user_id,
-                        content=notebook_response["notebook_content"],
-                        topic=filename
-                    )
-                    
-                    self.db.add(notebook)
-                    self.db.commit()
-                
-                except Exception as e:
-                    return {
-                        "status": "error",
-                        "message": f"Failed to save notebook for topic {topic}: {str(e)}"
-                    }
-            # 4. Return success with list of created notebooks
+
+                subtopics = subtopics_response["subtopics"]
+
+                # Generate content for each subtopic
+                notebook_cells = []
+                for subtopic_line in subtopics.split('\n'):
+                    subtopic = subtopic_line.strip()
+                    if not subtopic:
+                        continue
+
+                    content_response = self._get_content_for_subtopic(topic_title, subtopic)
+                    if content_response["status"] == "error":
+                        continue
+
+                    subtopic_content = content_response["content"]
+
+                    # Add the content as a cell
+                    notebook_cells.append({
+                        "type": "markdown",
+                        "content": subtopic_content
+                    })
+
+                if not notebook_cells:
+                    continue
+
+                # Assemble the notebook
+                notebook_content = self._assemble_notebook(topic_title, notebook_cells)
+
+                # Save the notebook
+                self._save_notebook(topic_title, notebook_content)
+
             return {
                 "status": "success",
-                "message":"Notebooks created successfully"
+                "message": "Notebooks created successfully"
             }
-            
+
         except Exception as e:
             return {
                 "status": "error",
                 "message": f"Failed to process text and create notebooks: {str(e)}"
             }
-
-    

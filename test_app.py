@@ -1,6 +1,4 @@
 import logging
-# Completely disable all logging
-#logging.disable(logging.CRITICAL)
 
 import pytest
 from app import app
@@ -97,9 +95,16 @@ def test_login(test_client):
     print(f'Login status code: {login_response.status_code}', flush=True)
     assert login_response.status_code == 200, f"Login failed with status {login_response.status_code}: {login_response.json}"
 """
+
 """
 def test_upload_file(test_client):
     
+    response = test_client.post('/signup', json={
+        'username': 'testuser',
+        'email': 'test@example.com',
+        'password': 'testpass123'
+    })
+
     login_response = test_client.post('/login', json={
         'username': 'uploadtest',
         'password': 'testpass123'
@@ -111,6 +116,7 @@ def test_upload_file(test_client):
             stream=f,
             filename='test.txt',
             content_type='text/plain'
+
         )
         data = {'file': file}
         
@@ -134,11 +140,10 @@ def test_upload_file(test_client):
         assert len(notebooks_response.json['data']) > 0, "No notebooks were created"
 
 """
-"""
-def test_get_notebooks(test_client):
+"""def test_get_notebooks(test_client):
     # First login
     test_client.post('/signup', json={
-        'username': 'notebooktest',
+        'username': 'notebooktest1',
         'email': 'notebook@example.com',
         'password': 'testpass123'
     })
@@ -152,16 +157,15 @@ def test_get_notebooks(test_client):
     assert 'data' in response.json 
 
 """
-
 def test_download_notebooks(test_client):
     # First login
     test_client.post('/signup', json={
-        'username': 'downloadtest',
-        'email': 'download@example.com',
+        'username': 'downloadtest1',
+        'email': 'download1@example.com',
         'password': 'testpass123'
     })
     login_response = test_client.post('/login', json={
-        'username': 'downloadtest',
+        'username': 'downloadtest1',
         'password': 'testpass123'
     })
     assert login_response.status_code == 200, "Login failed"
@@ -172,10 +176,12 @@ def test_download_notebooks(test_client):
             stream=f,
             filename='test.txt',
             content_type='text/plain'
+
         )
         data = {'file': file}
         
         # Upload the file
+    
         response = test_client.post('/upload', 
                                   data=data,
                                   content_type='multipart/form-data')
