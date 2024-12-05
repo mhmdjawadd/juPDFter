@@ -110,7 +110,7 @@ class ChatGPTAPIService:
         # Define a prompt to extract subtopics
         subtopic_prompt = (
             f"I have a topic about {topic}. I want you to give me an output in text where you provide "
-            "subtopics about the topic I just gave you, so that I can include it in a Jupyter notebook "
+            "10 TEN ONLY subtopics about the topic I just gave you, so that I can include it in a Jupyter notebook "
             "where it would be easier for learners to learn from. Remember, no .ipynb files; I just want the topics."
             "i want the text to be seperated by a new line and be raw text only"
         )
@@ -136,12 +136,11 @@ class ChatGPTAPIService:
                 "message": f"Failed to extract subtopics: {str(e)}"
             }
     
-    def _get_content_for_subtopic(self, topic: str, subtopic: str) -> Dict:
-        """Generate content for a subtopic within the given topic."""
+    def _get_content_for_subtopic(self, subtopic: str) -> Dict:
         content_prompt = (
-            f"Please provide an educational explanation on the subtopic '{subtopic}' under the main topic '{topic}'. "
-            "Include examples, especially those present in the original file, to illustrate the concepts. "
-            "The content should be suitable for inclusion in a Jupyter notebook cell for learners to understand easily."
+        f"For the topic '{subtopic}', please provide content for exactly three Jupyter notebook cells. "
+        "you can include as many markdown cells as you want but I want mas of 3 cells to be code , covering key points or examples. "
+        "Ensure the content is suitable for inclusion in a Jupyter notebook."
         )
 
         response = self._send_to_api("", content_prompt)
@@ -161,7 +160,7 @@ class ChatGPTAPIService:
                 "status": "error",
                 "message": f"Failed to extract content for subtopic: {str(e)}"
             }
-
+            
     def _assemble_notebook(self, title: str, cells: list) -> nbformat.NotebookNode:
         """Assemble notebook content using nbformat."""
         nb = nbformat.v4.new_notebook()
@@ -202,6 +201,7 @@ class ChatGPTAPIService:
 
     def process_text_and_create_notebooks(self, text: str) -> Dict:
         """Process text to extract topics, subtopics, and create notebooks."""
+        max_subtopics = 10
         topics_response = self._get_topics(text)
         if topics_response["status"] == "error":
             return topics_response
@@ -224,23 +224,38 @@ class ChatGPTAPIService:
                 subtopics = subtopics_response["subtopics"]
 
                 # Generate content for each subtopic
-                notebook_cells = []
+                notebook_cells = []   
+                subtopic_count = 0
                 for subtopic_line in subtopics.split('\n'):
                     subtopic = subtopic_line.strip()
                     if not subtopic:
                         continue
 
-                    content_response = self._get_content_for_subtopic(topic_title, subtopic)
+                    
+                    if subtopic_count >= max_subtopics:
+                        break 
+                    content_response = self._get_content_for_subtopic(subtopic)
                     if content_response["status"] == "error":
-                        continue
+                            continue
 
                     subtopic_content = content_response["content"]
 
-                    # Add the content as a cell
-                    notebook_cells.append({
-                        "type": "markdown",
-                        "content": subtopic_content
-                    })
+                        # Add the content as a cell
+                    if subtopic_content.strip().startswith("```"):
+                        # It's code
+                        code_content = subtopic_content.strip().strip('```').strip()
+                        notebook_cells.append({
+                                "type": "code",
+                                "content": code_content
+                            })
+                    else:
+                        # It's markdown
+                        notebook_cells.append({
+                                "type": "markdown",
+                                "content": subtopic_content
+                            })
+                    subtopic_count += 1
+                    
 
                 if not notebook_cells:
                     continue

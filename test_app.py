@@ -1,15 +1,6 @@
-import logging
-
-import pytest
 from app import app
-import io
-from database import  engine
-from sqlalchemy import inspect
-import pytest
-from pytest import mark
+import pytest, json
 from werkzeug.datastructures import FileStorage
-import os
-import json
 from pathlib import Path
 
 @pytest.fixture(scope='function')
@@ -159,13 +150,14 @@ def test_upload_file(test_client):
 """
 def test_download_notebooks(test_client):
     # First login
-    test_client.post('/signup', json={
-        'username': 'downloadtest1',
-        'email': 'download1@example.com',
+    sign_up = test_client.post('/signup', json={
+        'username': 'mohammadjawad',
+        'email': 'download@example.com',
         'password': 'testpass123'
     })
+    assert sign_up.status_code == 201, "Signup failed"
     login_response = test_client.post('/login', json={
-        'username': 'downloadtest1',
+        'username': 'mohammadjawad',
         'password': 'testpass123'
     })
     assert login_response.status_code == 200, "Login failed"
