@@ -1,0 +1,111 @@
+From the provided document, please follow these steps to analyze and generate a comprehensive output in JSON format:
+
+1) **Extract the topics:**
+
+- Extract all major topics, subtopics, and examples mentioned in the document, ensuring no topics are missed.
+- For each page, extract the main topic and ensure you capture every significant topic from the entire document.
+- Analyze the relationships between topics to ensure the flow is coherent, noting how each topic relates to or builds upon the previous one.
+- Keep the topics in chronological order as they appear in the document.
+- For each topic, classify whether it is a main topic, a subtopic, or an example.
+- Group the topics into sections based on their relationships, organizing them into key themes.
+- Identify the overall main topic of the document and provide a brief summary of this main topic based on the extracted sections.
+
+2) **Summarize each topic:**
+
+- For each main topic, provide a clear summary of the key points discussed in the document.
+- For each subtopic, provide a concise but comprehensive summary reflecting the key concepts under the main topic.
+- If the topic includes examples or case studies, briefly mention them to illustrate the practical applications of the concepts.
+- Focus on the relevance of each topic within the broader context of the document.
+
+3) **Provide examples for each topic:**
+
+- For each extracted topic, if examples or case studies are mentioned in the text, include them to show their relevance.
+- If no examples or case studies are explicitly mentioned in the document, generate relevant examples based on your knowledge. The generated examples should illustrate the concepts discussed and be applicable to the subject matter.
+- Make it clear if the examples are generated based on your knowledge and not directly from the document.
+- Ensure the examples enhance understanding and are clearly related to the topic.
+
+4) **Formatting:**
+
+- The output should be structured in JSON format.
+- i
+- Subtopics should be nested within the relevant main topic and include their own summary and examples.
+- Ensure each example is specific, relevant, and linked to the topic it explains.
+
+5) **Final Output Structure:**
+
+The final JSON output should follow this structure:
+From the provided document, please follow these steps to analyze and generate a comprehensive output in JSON format:
+
+1) **Extract the topics:**
+
+- Extract all major topics, subtopics, and examples mentioned in the document, ensuring no topics are missed.
+- For each page, extract the main topics and ensure you capture every significant topic from the entire document.
+- Analyze the relationships between topics to ensure the flow is coherent, noting how each topic relates to or builds upon the previous one.
+- Keep the topics in chronological order as they appear in the document.
+- For each topic, classify whether it is a main topic, a subtopic, or an example.
+- Group the topics into sections based on their relationships, organizing them into key themes.
+- Identify the overall main topic of the document and provide a brief summary of this main topic based on the extracted sections.
+
+2) **Summarize each topic:**
+
+- For each main topic, provide a clear summary of the key points discussed in the document.
+- For each subtopic, provide a concise but comprehensive summary reflecting the key concepts under the main topic.
+- If the topic includes examples or case studies, briefly mention them to illustrate the practical applications of the concepts.
+- Focus on the relevance of each topic within the broader context of the document.
+
+3) **Provide examples for each topic:**
+
+- For each extracted topic, if examples or case studies are mentioned in the text, include them to show their relevance.
+- If no examples or case studies are explicitly mentioned in the document, generate relevant examples based on your knowledge. The generated examples should illustrate the concepts discussed and be applicable to the subject matter.
+- Make it clear if the examples are generated based on your knowledge and not directly from the document.
+- Ensure the examples enhance understanding and are clearly related to the topic.
+
+4) **Formatting:**
+
+- The output should be structured in JSON format.
+- Include a `main_ideas` array at the top level.
+- Each main idea should be represented as a JSON object, with fields for the title, summary, and an array of subtopics.
+- Subtopics should include their own fields for title, summary, and example(s).
+- Examples should be specific, relevant, and tied to the subtopic they explain.
+
+5) **Final Output Structure:**
+
+The final JSON output should follow this structure:
+
+
+{
+  "main_ideas": [
+    {
+      "Main Idea": "Title of main idea 1",
+      "Summary": "Summary of main idea 1",
+      "Subtopics": [
+        {
+          "Subtopic": "Title of subtopic 1",
+          "Summary": "Summary of subtopic 1",
+          "Example": "Example of subtopic 1"
+        },
+        {
+          "Subtopic": "Title of subtopic 2",
+          "Summary": "Summary of subtopic 2",
+          "Example": "Example of subtopic 2"
+        }
+      ]
+    },
+    {
+      "Main Idea": "Title of main idea 2",
+      "Summary": "Summary of main idea 2",
+      "Subtopics": [
+        {
+          "Subtopic": "Title of subtopic 1",
+          "Summary": "Summary of subtopic 1",
+          "Example": "Example of subtopic 1"
+        },
+        {
+          "Subtopic": "Title of subtopic 2",
+          "Summary": "Summary of subtopic 2",
+          "Example": "Example of subtopic 2"
+        }
+      ]
+    }
+  ]
+}
