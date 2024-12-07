@@ -9,9 +9,11 @@ from pathlib import Path
 
 import jwt 
 from jwt import encode , decode 
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
 api_key = "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"  
 
@@ -51,17 +53,43 @@ def token_required(f):
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
+    print(data)
+
+    # Check if all required fields are present
+    required_fields = ['username', 'email', 'password']
+    if not all(field in data for field in required_fields):
+        print("Missing required fields")
+        return jsonify({
+            'status': 'error',
+            'message': 'Missing required fields'
+        }), 400
     username = data.get('username')
     password = data.get('password')
+    email=data.get('email')
 
-    if not username or not password:
-        return jsonify({'message': 'Username and password are required!'}), 400
+    # Check if the user already exists
+    with get_db_context() as db:
+        user = db.query(User).filter_by(username=username).first()
+        if user:
+            return jsonify({'message': 'User already exists!'}), 400
+        
+    #check if the email    already exists
+    with get_db_context() as db:
+        user = db.query(User).filter_by(email=email).first()
+        if user:
+            return jsonify({'message': 'Email already exists!'}), 400
+    
+
+    # if not username or not password or not email:
+    #     return jsonify({'message': 'Username, password and email are required!'}), 400
 
     hashed_password = generate_password_hash(password)
+
     with get_db_context() as db:
-        new_user = User(username=username, password=hashed_password)
+        new_user = User(username=username, password=hashed_password, email=email)
         db.add(new_user)
         db.commit()
+
 
     return jsonify({'message': 'Registered successfully'}), 201
 
