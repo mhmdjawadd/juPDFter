@@ -5,7 +5,6 @@ import './ProgressIndicator.css'; // Import CSS for styling
 
 const ProgressIndicator = () => {
   const [status, setStatus] = useState('Waiting'); // Initial status
-  const [progress, setProgress] = useState(0); // Initial progress (0%)
 
   // Polling backend for status updates
   useEffect(() => {
@@ -13,7 +12,6 @@ const ProgressIndicator = () => {
       try {
         const response = await axios.get("http://localhost:5000/process"); // Fetch status from backend
         setStatus(response.data.status);
-        setProgress(response.data.progress); // Backend should send progress percentage
       } catch (error) {
         console.error("Error fetching progress:", error);
       }
@@ -25,14 +23,6 @@ const ProgressIndicator = () => {
   return (
     <div className="progress-indicator-container">
       <div className="status-message">Document Processing Status: {status}</div>
-      <div className="progress-bar-container">
-        <div
-          className="progress-bar"
-          style={{ width: `${progress}%` }}
-        >
-          {progress}%
-        </div>
-      </div>
     </div>
   );
 };

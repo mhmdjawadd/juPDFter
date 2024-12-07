@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import FileUpload from './components/FileUpload';
 import ProgressIndicator from './components/ProgressIndicator';
 import DownloadList from './components/DownloadList';
 import LoginSignup from './pages/loginSignUp';
+import PremiumPlans from './pages/PremiumPlans'; // Import the PremiumPlans component
 import axios from 'axios'; // Import Axios for API calls
+import { Link } from 'react-router-dom'; // Use Link instead of useNavigate
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track login status
@@ -47,7 +49,11 @@ function App() {
               <div className="App">
                 <button onClick={handleLogout} className="btn logout-button">
                   Logout
-                </button> {/* Add Logout Button */}
+                </button>
+                {/* Premium Plans Button */}
+                <Link to="/premium-plans" className="btn premium-button">
+                  Premium Plans
+                </Link>
                 <FileUpload />
                 <ProgressIndicator />
                 <DownloadList />
@@ -57,9 +63,13 @@ function App() {
             )
           }
         />
+
+        {/* Premium Plans Page */}
+        <Route path="/premium-plans" element={<PremiumPlans />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
+

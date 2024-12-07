@@ -1,123 +1,109 @@
-/* FileUpload.css */
-.file-upload-container {
-  display: flex;                /* Enable flexbox */
-  flex-direction: column;       /* Stack children vertically */
-  justify-content: center;      /* Center content vertically */
-  align-items: center;          /* Center content horizontally */
-  margin-top: 3rem;            /* Take up the full height of the viewport */
+.premium-plans {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.premium-plans-title{
+  color: white;
+  margin-bottom:50px;
+}
+
+.plans {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.plan {
+  background-color: white;
+  border: 1px solid #960aa3;
+  padding: 20px;
+  border-radius: 10px;
+  width: 200px;
+}
+
+.plan h2 {
+  margin-bottom: 10px;
+}
+
+.s1{
+  background-color: #b403ab; /* Terra cotta base color */
+  color: white;
+  font-size: 1rem;
+  margin-top:2rem;
+  font-weight: bold;
+  border: none; /* Remove default border */
+  border-radius: 2px; /* Rounded corners */
+  box-shadow: 0 6px rgba(196, 65, 201, 0.6), 0 10px 20px rgba(0, 0, 0, 0.2); /* 3D shadow effect */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth animations */
+  position: relative; /* Positioning for 3D hover effect */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); /* Add depth to text */
+
+}
+.s1:hover {
+  background-color: #d44fc9; /* Richer terra cotta on hover */
+  transform: translateY(-4px); /* Lift the button */
+  box-shadow: 0 10px rgba(197, 59, 179, 0.8), 0 15px 25px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+}
+
+.s2{
+  background-color: #b403ab; /* Terra cotta base color */
+  color: white;
+  font-size: 1rem;
+  margin-top:11px;
+  font-weight: bold;
+  border: none; /* Remove default border */
+  border-radius: 2px; /* Rounded corners */
+  box-shadow: 0 6px rgba(196, 65, 201, 0.6), 0 10px 20px rgba(0, 0, 0, 0.2); /* 3D shadow effect */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Smooth animations */
+  position: relative; /* Positioning for 3D hover effect */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); /* Add depth to text */
   
 }
-
-
-.file-upload-heading {
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  margin-top: 3rem;
-  color: white;
+.s2:hover {
+  background-color: #d44fc9; /* Richer terra cotta on hover */
+  transform: translateY(-4px); /* Lift the button */
+  box-shadow: 0 10px rgba(197, 59, 179, 0.8), 0 15px 25px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
 }
 
-.file-input {
-  margin-bottom: 1.5rem;
-}
-.logout-button{
+.s3{
   background-color: #b403ab; /* Terra cotta base color */
   color: white;
-  margin-left:2.5rem;
-  margin-top:1rem;
-  font-size: 1rem;
+  font-size: 0.rem;
   font-weight: bold;
-  padding: 0.8rem 3rem; /* Adjust size */
+  margin-top:2.7rem;
   border: none; /* Remove default border */
-  border-radius: 12px; /* Rounded corners */
+  border-radius: 2px; /* Rounded corners */
   box-shadow: 0 6px rgba(196, 65, 201, 0.6), 0 10px 20px rgba(0, 0, 0, 0.2); /* 3D shadow effect */
   cursor: pointer;
   transition: all 0.3s ease; /* Smooth animations */
   position: relative; /* Positioning for 3D hover effect */
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); /* Add depth to text */
+  
 }
-.logout-button:hover {
-  background-color: #d44fc9; /* Richer terra cotta on hover */
-  transform: translateY(-4px); /* Lift the button */
-  box-shadow: 0 10px rgba(197, 59, 179, 0.8), 0 15px 25px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
-}
-
-.premium-button{
-  background-color: #b403ab; 
-  color: white;
-  margin-left:50rem;
-  margin-top:1rem;
-  font-size: 1rem;
-  font-weight: bold;
-  padding: 0.8rem 3rem; /* Adjust size */
-  border: none; /* Remove default border */
-  border-radius: 12px; /* Rounded corners */
-  box-shadow: 0 6px rgba(196, 65, 201, 0.6), 0 10px 20px rgba(0, 0, 0, 0.2); /* 3D shadow effect */
-  cursor: pointer;
-  transition: all 0.3s ease; /* Smooth animations */
-  position: relative; /* Positioning for 3D hover effect */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); /* Add depth to text */
-
-}
-
-.premium-button:hover {
+.s3:hover {
   background-color: #d44fc9; /* Richer terra cotta on hover */
   transform: translateY(-4px); /* Lift the button */
   box-shadow: 0 10px rgba(197, 59, 179, 0.8), 0 15px 25px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
 }
 
 
-.upload-button{
-  background-color: #b403ab; /* Terra cotta base color */
-  color: white;
-  margin-left:5rem;
-  font-size: 1rem;
-  font-weight: bold;
-  padding: 0.8rem 3rem; /* Adjust size */
-  border: none; /* Remove default border */
-  border-radius: 12px; /* Rounded corners */
-  box-shadow: 0 6px rgba(196, 65, 201, 0.6), 0 10px 20px rgba(0, 0, 0, 0.2); /* 3D shadow effect */
-  cursor: pointer;
-  transition: all 0.3s ease; /* Smooth animations */
-  position: relative; /* Positioning for 3D hover effect */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4); /* Add depth to text */
+.limited-document-upload{
+  margin-top:2rem;
+  font-size: 0.8rem;
+}
+.limited-document-processing{
+  font-size: 0.75rem;
+
 }
 
-.upload-button:hover {
-  background-color: #d44fc9; /* Richer terra cotta on hover */
-  transform: translateY(-4px); /* Lift the button */
-  box-shadow: 0 10px rgba(197, 59, 179, 0.8), 0 15px 25px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+.unlimited-uploads,.advanced-ai,.priority-support{
+  font-size: 0.8rem;
 }
 
-.upload-button:active{
-  background-color: #d46ad8; /* Deep terra cotta on click */
-  transform: translateY(2px); /* Push down slightly */
-  box-shadow: 0 4px rgba(223, 57, 214, 0.7), 0 8px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-}
-
-.upload-button::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0)); /* Subtle shine effect */
-  border-radius: 12px; /* Match button radius */
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none; /* Prevent interaction with pseudo-element */
-}
-
-.upload-button:hover::before {
-  opacity: 1; /* Show shine effect */
-}
-
-.upload-button:focus {
-  outline: none;
-  box-shadow: 0 0 8px rgba(209, 96, 61, 0.8); /* Add focus glow */
-}
-
-
-.upload-message {
-  margin-top: 0.5rem;
+.custom{
+  margin-top:3.2rem;
+  font-size:0.9rem;
 }
