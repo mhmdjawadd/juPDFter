@@ -6,17 +6,19 @@ from models import *
 from services import *
 from werkzeug.security import check_password_hash, generate_password_hash
 from pathlib import Path
-import nbformat
-import jwt
+
+import jwt 
+from jwt import encode , decode 
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
-api_key = 'your-api-key'  # Set your API key here
+api_key = "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"  
 
 # Initialize tables in the database
 with app.app_context():
     print("Initializing database from app.py")
-    init_db(reset=True)
+    init_db(True)
 
 # JWT token required decorator
 def token_required(f):
@@ -119,7 +121,7 @@ def upload_file_and_create_notebooks(current_user):
         # Initialize ChatGPT API and process content
         with get_db_context() as db:
             chatgpt = ChatGPTAPIService(api_key, current_user.id, db)
-            response = chatgpt.process_text_and_create_notebooks(processed_content)
+            response = chatgpt.create_notebooks(processed_content)
 
             if response['status'] == 'success':
                 return jsonify(response), 200
@@ -135,7 +137,9 @@ def upload_file_and_create_notebooks(current_user):
 def get_notebooks(current_user):
     try:
         with get_db_context() as db:
-            notebooks = NotebookService.get_notebooks(db, current_user.id)
+            notebooks = db.query(Notebook) \
+                .filter(Notebook.user_id == current_user.id) \
+                .all()  
             notebook_data = [
                 {'id': nb.id, 'topic': nb.topic, 'content': nb.content} for nb in notebooks
             ]
@@ -153,7 +157,9 @@ def get_notebooks(current_user):
 def download_notebooks(current_user):
     try:
         with get_db_context() as db:
-            notebooks = NotebookService.get_notebooks(db, current_user.id)
+            notebooks =  db.query(Notebook) \
+                .filter(Notebook.user_id == current_user.id) \
+                .all()   
 
             if not notebooks:
                 return jsonify({'status': 'error', 'message': 'No notebooks found'}), 404
@@ -164,33 +170,12 @@ def download_notebooks(current_user):
             saved_files = []
             for notebook in notebooks:
                 try:
-                    # Create a new notebook using nbformat
-                    nb = nbformat.v4.new_notebook()
+                    file_path = downloads_path / f"{notebook.topic}"
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.write(notebook.content)
+                    saved_files.append(str(file_path))
 
-                    # Convert the content string to markdown cells
-                    content_lines = notebook.content.split('\n')
-                    cells = []
-                    current_cell = []
-
-                    for line in content_lines:
-                        if line.startswith('#'):
-                            if current_cell:
-                                cells.append(nbformat.v4.new_markdown_cell('\n'.join(current_cell)))
-                                current_cell = []
-                        current_cell.append(line)
-
-                    if current_cell:
-                        cells.append(nbformat.v4.new_markdown_cell('\n'.join(current_cell)))
-
-                    nb['cells'] = cells
-
-                    # Save notebook
-                    notebook_filename = f"{notebook.topic}.ipynb"
-                    notebook_path = downloads_path / notebook_filename
-                    with open(notebook_path, 'w', encoding='utf-8') as f:
-                        nbformat.write(nb, f)
-
-                    saved_files.append(notebook_filename)
+                    
 
                 except Exception as e:
                     print(f"Error processing notebook {notebook.topic}: {str(e)}")

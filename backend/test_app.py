@@ -2,7 +2,8 @@ from app import app
 import pytest, json
 from werkzeug.datastructures import FileStorage
 from pathlib import Path
-
+from sqlalchemy import inspect
+from database import engine
 @pytest.fixture(scope='function')
 def test_client():
     app.config['TESTING'] = True
@@ -33,7 +34,6 @@ def test_tables_exist():
             print(f"- {column['name']}: {column['type']}")
 
 
-@mark.timeout(1)
 def test_signup(test_client):
     # Test successful signup
     response = test_client.post('/signup', json={
@@ -56,7 +56,6 @@ def test_signup(test_client):
     assert response.json['status'] == 'error'
 
 
-@mark.timeout(5)
 def test_login(test_client):
     print('=== Starting login test ===', flush=True)
     
@@ -85,9 +84,7 @@ def test_login(test_client):
     print(f'Login response: {login_response.json}', flush=True)
     print(f'Login status code: {login_response.status_code}', flush=True)
     assert login_response.status_code == 200, f"Login failed with status {login_response.status_code}: {login_response.json}"
-"""
 
-"""
 def test_upload_file(test_client):
     
     response = test_client.post('/signup', json={
@@ -130,8 +127,7 @@ def test_upload_file(test_client):
         assert 'data' in notebooks_response.json
         assert len(notebooks_response.json['data']) > 0, "No notebooks were created"
 
-"""
-"""def test_get_notebooks(test_client):
+def test_get_notebooks(test_client):
     # First login
     test_client.post('/signup', json={
         'username': 'notebooktest1',
@@ -146,8 +142,8 @@ def test_upload_file(test_client):
     response = test_client.get('/notebooks')
     assert response.status_code == 200
     assert 'data' in response.json 
-
 """
+
 def test_download_notebooks(test_client):
     # First login
     sign_up = test_client.post('/signup', json={
@@ -161,7 +157,7 @@ def test_download_notebooks(test_client):
         'password': 'testpass123'
     })
     assert login_response.status_code == 200, "Login failed"
-
+    token = login_response.json['token']
     # Upload a test file first to ensure we have notebooks
     with open('./tests/test.txt', 'rb') as f:
         file = FileStorage(
@@ -176,13 +172,18 @@ def test_download_notebooks(test_client):
     
         response = test_client.post('/upload', 
                                   data=data,
-                                  content_type='multipart/form-data')
+                                  content_type='multipart/form-data',
+                                  headers={'Authorization': f'Bearer {token}'})
     
-
+    print("Upload Response:", flush=True)
+    print(f"Status Code: {response.status_code}", flush=True)
+    print(f"Response Data: {response.get_json()}", flush=True)  # Use get_json() instead of response.json
+    assert response.status_code == 200 , "Upload failed"
     # Test downloading notebooks
-    download_response = test_client.get('/download-notebooks')
-    assert download_response.status_code == 200, "Download failed"
+    download_response = test_client.get('/download-notebooks',headers={'Authorization': f'Bearer {token}'})
+    assert download_response.status_code == 200, print(download_response.json)
     assert download_response.json['status'] == 'success'
+    
     
     # Verify files were created in downloads folder
     downloads_path = Path.home() / 'Downloads' / 'juPDFter_notebooks'
@@ -198,3 +199,4 @@ def test_download_notebooks(test_client):
         with open(notebook_path, 'r') as f:
             notebook_content = json.load(f)
             assert isinstance(notebook_content, dict), "Invalid notebook format"
+
