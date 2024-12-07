@@ -18,3 +18,4 @@ class Notebook(Base):
 
     def __repr__(self):
         return f"Notebook(id={self.id}, topic='{self.topic}')" 
+    
