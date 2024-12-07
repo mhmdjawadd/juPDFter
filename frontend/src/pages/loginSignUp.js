@@ -21,9 +21,9 @@ const LoginSignup = ({ setIsAuthenticated }) => {
         <h2 className="heading">{isSignUp ? "Sign Up" : "Log In"}</h2>
         <form className="form" onSubmit={handleSubmit}>
           <input
-            type="text"
-            placeholder="Username"
-            className="input username-input"
+            type="email"
+            placeholder="Email"
+            className="input email-input"
           />
           <input
             type="password"
