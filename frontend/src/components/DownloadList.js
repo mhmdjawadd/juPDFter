@@ -4,42 +4,29 @@ import axios from "axios";
 import "./DownloadList.css"; // Import the CSS file for styling
 
 const DownloadList = () => {
-  const [notebooks, setNotebooks] = useState([]); // State to hold the list of notebooks
+  const [notebooksFetched, setNotebooksFetched] = useState(false); // State to track whether notebooks are fetched
+  const [message, setMessage] = useState("Sorry, no notebooks to display."); // Initial message
 
   useEffect(() => {
-    // Fetch the list of downloadable notebooks from the backend
-    const fetchNotebooks = async () => {
+    // Fetch the status of notebook generation from the backend
+    const checkNotebooksStatus = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/download/list");
-        setNotebooks(response.data);
+        const response = await axios.get("http://localhost:5000/download/status");
+        if (response.data.status === "fetched") {
+          setNotebooksFetched(true);
+          setMessage("Notebooks Generated! Please check your local downloads folder.");
+        }
       } catch (error) {
-        console.error("Error fetching notebooks:", error);
+        console.error("Error checking notebook status:", error);
       }
     };
 
-    fetchNotebooks();
+    checkNotebooksStatus();
   }, []);
 
   return (
     <div className="download-list-container">
-      <h3 className="download-list-heading">Download Generated Notebooks</h3>
-      {notebooks.length > 0 ? (
-        <ul className="notebook-list">
-          {notebooks.map((notebook, index) => (
-            <li key={index} className="notebook-item">
-              <a
-                href={`http://localhost:5000${notebook.path}`}
-                className="download-link"
-                download
-              >
-                {notebook.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="no-notebooks">No notebooks available for download 😞 </p>
-      )}
+      <p className="notebook-message">{message}</p>
     </div>
   );
 };
