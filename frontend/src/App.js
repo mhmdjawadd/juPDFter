@@ -14,9 +14,20 @@ function App() {
   // Logout function
   const handleLogout = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/logout', {}, { withCredentials: true });
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        'http://localhost:5000/logout', 
+        {}, 
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
       if (response.data.status === 'success') {
+        localStorage.removeItem("token");
         setIsAuthenticated(false); // Update authentication state
+
       } else {
         alert(response.data.message);
       }
@@ -30,16 +41,19 @@ function App() {
     <Router>
       <Routes>
         {/* Login/Signup Page */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <LoginSignup setIsAuthenticated={setIsAuthenticated} />
-            )
-          }
-        />
+            <Route
+                  path="/"
+                  element={
+                    isAuthenticated ? (
+                      <>
+                        {console.log("Redirecting to dashboard...")}
+                        <Navigate to="/dashboard" replace />
+                      </>
+                    ) : (
+                      <LoginSignup setIsAuthenticated={setIsAuthenticated} />
+                    )
+                  }
+                />
 
         {/* Dashboard Page */}
         <Route

@@ -66,24 +66,19 @@ def signup():
     print(data)
 
     # Check if all required fields are present
-    required_fields = ['username', 'email', 'password']
+    required_fields = ['email', 'password']
     if not all(field in data for field in required_fields):
         print("Missing required fields")
         return jsonify({
             'status': 'error',
             'message': 'Missing required fields'
         }), 400
-    username = data.get('username')
+    
     password = data.get('password')
     email=data.get('email')
+    username = email.split('@')[0]
 
-    # Check if the user already exists
-    with get_db_context() as db:
-        user = db.query(User).filter_by(username=username).first()
-        if user:
-            return jsonify({'message': 'User already exists!'}), 400
-        
-    #check if the email    already exists
+    #check if the email already exists
     with get_db_context() as db:
         user = db.query(User).filter_by(email=email).first()
         if user:
@@ -100,18 +95,24 @@ def signup():
         db.add(new_user)
         db.commit()
 
+    token = jwt.encode({
+            'user_id': new_user.id,
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+        }, app.config['SECRET_KEY'], algorithm="HS256")
 
-    return jsonify({'message': 'Registered successfully'}), 201
+    print(f'User {username} registered successfully! with token {token}')
+    return jsonify({'status': 'success','token': token}) , 201
+    
 
 # User login route
 @app.route('/login', methods=['POST'])
 def login():
     auth = request.get_json()
 
-    username = auth.get('username')
+    email = auth.get('email')
     password = auth.get('password')
 
-    if not username or not password:
+    if not email or not password:
         return jsonify({
     'status': 'error',
     'message': 'Could not verify'
@@ -119,7 +120,7 @@ def login():
 
 
     with get_db_context() as db:
-        user = db.query(User).filter_by(username=username).first()
+        user = db.query(User).filter_by(email=email).first()
 
     if not user:
         return jsonify({
@@ -132,15 +133,28 @@ def login():
             'user_id': user.id,
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
         }, app.config['SECRET_KEY'], algorithm="HS256")
-
-        return jsonify({'token': token})
+        print(f'User {user.email} logged in successfully! with token {token}')
+        return jsonify({'token': token , 'status' : "success"}),200
 
     return jsonify({
     'status': 'error',
     'message': 'Could not verify'
 }), 401
 
-
+#
+@app.route('/logout', methods=['POST'])
+@token_required
+def logout(current_user):
+    try:
+        return jsonify({
+            'status': 'success',
+            'message': 'Successfully logged out'
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Logout failed: {str(e)}'
+        }), 500
 
 # File upload and notebook creation route
 @app.route('/upload', methods=['POST'])
@@ -216,32 +230,30 @@ def download_notebooks(current_user):
             downloads_path = Path.home() / 'Downloads' / 'juPDFter_notebooks'
             downloads_path.mkdir(parents=True, exist_ok=True)
 
-            saved_files = []
+            notebook_list = []
             for notebook in notebooks:
                 try:
-                    file_path = downloads_path / f"{notebook.topic}"
+                    file_name = f"{notebook.topic}.ipynb"
+                    file_path = downloads_path / file_name
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(notebook.content)
-                    saved_files.append(str(file_path))
-
                     
+                    notebook_list.append({
+                        'name': file_name,
+                        'path': f"/downloads/{file_name}"
+                    })
 
                 except Exception as e:
                     print(f"Error processing notebook {notebook.topic}: {str(e)}")
                     continue
 
-            if not saved_files:
+            if not notebook_list:
                 return jsonify({'status': 'error', 'message': 'Failed to save any notebooks'}), 500
 
-            return jsonify({
-                'status': 'success',
-                'message': 'Notebooks downloaded successfully',
-                'saved_files': saved_files,
-                'download_path': str(downloads_path)
-            })
+            return jsonify(notebook_list)
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to download notebooks: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

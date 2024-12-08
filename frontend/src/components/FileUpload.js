@@ -23,8 +23,11 @@ const FileUpload = () => {
     formData.append("file", file);
 
     try {
+      const token = localStorage.getItem('token');
       const response = await axios.post("http://localhost:5000/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "multipart/form-data" ,
+          "Authorization": `Bearer ${token}`
+        },
       });
       setMessage("File uploaded successfully!");
     } catch (error) {

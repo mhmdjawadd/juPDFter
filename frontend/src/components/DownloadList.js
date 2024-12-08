@@ -10,7 +10,14 @@ const DownloadList = () => {
     // Fetch the list of downloadable notebooks from the backend
     const fetchNotebooks = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/download/list");
+        const token = localStorage.getItem('token');
+        const response = await axios.get("http://localhost:5000//download-notebooks",
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
         setNotebooks(response.data);
       } catch (error) {
         console.error("Error fetching notebooks:", error);

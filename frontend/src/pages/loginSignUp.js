@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios"; // Import Axios for API calls
 import "./loginSignUp.css";
+import { useNavigate } from "react-router-dom";
 
 const LoginSignup = ({ setIsAuthenticated }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +20,11 @@ const LoginSignup = ({ setIsAuthenticated }) => {
         });
         if (response.data.status === "success") {
           alert("Account created successfully!");
+          const token = response.data.token;
+          localStorage.setItem("token", token)
           setIsAuthenticated(true);
+          navigate("/dashboard");
+          
         } else {
           alert(response.data.message);
         }
@@ -30,7 +36,13 @@ const LoginSignup = ({ setIsAuthenticated }) => {
         });
         if (response.data.status === "success") {
           alert("Logged in successfully!");
+          const token = response.data.token;
+          localStorage.setItem("token", token)
           setIsAuthenticated(true);
+          console.log("Navigating to dashboard...");
+          navigate("/dashboard");
+          
+          
         } else {
           alert(response.data.message);
         }
