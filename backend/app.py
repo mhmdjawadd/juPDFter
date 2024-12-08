@@ -8,7 +8,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from pathlib import Path
 from jwt import encode , decode 
 from flask_cors import CORS
-
+from dotenv import load_dotenv
+load_dotenv()  
 
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
@@ -16,7 +17,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 ALLOWED_EXTENSIONS={'pdf','docx','txt'}
 
-api_key = "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"  
+api_key = os.getenv('API_KEY', 'default_api_key')
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -270,7 +271,6 @@ def check_process_status(current_user):
     return jsonify({
         'status': status
     })
-
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
