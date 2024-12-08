@@ -4,49 +4,43 @@ import axios from "axios";
 import "./DownloadList.css"; // Import the CSS file for styling
 
 const DownloadList = () => {
-  const [notebooks, setNotebooks] = useState([]); // State to hold the list of notebooks
+  const [notebooksFetched, setNotebooksFetched] = useState(false); // State to track whether notebooks are fetched
+  const [message, setMessage] = useState("Sorry, no notebooks to display."); // Initial message
 
   useEffect(() => {
-    // Fetch the list of downloadable notebooks from the backend
-    const fetchNotebooks = async () => {
+    // Fetch the status of notebook generation from the backend
+    const checkNotebooksStatus = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get("http://localhost:5000//download-notebooks",
+        const response = await axios.get("http://localhost:5000/download/status",
           {
             headers: {
               'Authorization': `Bearer ${token}`
             }
-          }
-        );
-        setNotebooks(response.data);
+          });
+        
+        if (response.data.status === "fetched") {
+          setNotebooksFetched(true);
+          setMessage("Notebooks Generated! Please check your local downloads folder.");
+        }
       } catch (error) {
-        console.error("Error fetching notebooks:", error);
+        console.error("Error checking notebook status:", error);
       }
     };
 
-    fetchNotebooks();
+    // Initial check
+    checkNotebooksStatus();
+
+    // Set up polling interval - 20000ms = 20 seconds
+    const interval = setInterval(checkNotebooksStatus, 20000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="download-list-container">
-      <h3 className="download-list-heading">Download Generated Notebooks</h3>
-      {notebooks.length > 0 ? (
-        <ul className="notebook-list">
-          {notebooks.map((notebook, index) => (
-            <li key={index} className="notebook-item">
-              <a
-                href={`http://localhost:5000${notebook.path}`}
-                className="download-link"
-                download
-              >
-                {notebook.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="no-notebooks">No notebooks available for download 😞 </p>
-      )}
+      <p className="notebook-message">{message}</p>
     </div>
   );
 };

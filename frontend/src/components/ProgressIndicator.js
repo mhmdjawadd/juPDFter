@@ -10,12 +10,17 @@ const ProgressIndicator = () => {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const response = await axios.get("http://localhost:5000/process"); // Fetch status from backend
+        const token = localStorage.getItem('token');
+        const response = await axios.get("http://localhost:5000/process",{
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }); // Fetch status from backend
         setStatus(response.data.status);
       } catch (error) {
         console.error("Error fetching progress:", error);
       }
-    }, 2000); // Poll every 2 seconds
+    }, 20000); // Poll every 20 seconds
 
     return () => clearInterval(interval); // Cleanup on component unmount
   }, []);

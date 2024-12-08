@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify , current_app
 import datetime , jwt , os
 from functools import wraps
 from database import *
@@ -31,6 +31,11 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Adjust the
 # Initialize tables in the database
 with app.app_context():
     init_db(True)
+# Add global variable to track processing status
+def get_processing_status():
+    if not hasattr(current_app, 'processing_status'):
+        current_app.processing_status = {}
+    return current_app.processing_status
 
 # JWT token required decorator
 def token_required(f):
@@ -178,16 +183,9 @@ def create_notebooks(current_user):
                 response = chatgpt.create_notebooks(processed_content)
 
                 if response['status'] == 'success':
-                    # If notebook creation succeeds, retrieve all notebooks
-                    notebooks = db.query(Notebook).filter(Notebook.user_id == current_user.id).all()
-                    notebook_data = [
-                        {'id': nb.id, 'topic': nb.topic, 'content': nb.content} for nb in notebooks
-                    ]
-                    return jsonify({
-                        'status': 'success',
-                        'message': 'Notebooks created and retrieved successfully',
-                        'notebooks': notebook_data
-                    }), 200
+                    get_processing_status()[current_user.id] = "fetched"
+                    download_response = _download_notebooks(current_user)
+                    return download_response
                 else:
                     return jsonify(response), response.status_code
 
@@ -214,10 +212,17 @@ def get_notebooks(current_user):
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to retrieve notebooks: {str(e)}'}), 500
 
-# Route to download notebooks
-@app.route('/download-notebooks', methods=['GET'])
+@app.route('/download/status', methods=['GET'])
 @token_required
-def download_notebooks(current_user):
+def check_download_status(current_user):
+    status = get_processing_status().get(current_user.id, "processing")
+    return jsonify({
+        'status': status,
+    })
+
+
+
+def _download_notebooks(current_user):
     try:
         with get_db_context() as db:
             notebooks =  db.query(Notebook) \
@@ -230,30 +235,42 @@ def download_notebooks(current_user):
             downloads_path = Path.home() / 'Downloads' / 'juPDFter_notebooks'
             downloads_path.mkdir(parents=True, exist_ok=True)
 
-            notebook_list = []
+            saved_files = []
             for notebook in notebooks:
                 try:
-                    file_name = f"{notebook.topic}.ipynb"
-                    file_path = downloads_path / file_name
+                    file_path = downloads_path / f"{notebook.topic}"
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(notebook.content)
+                    saved_files.append(str(file_path))
+
                     
-                    notebook_list.append({
-                        'name': file_name,
-                        'path': f"/downloads/{file_name}"
-                    })
 
                 except Exception as e:
                     print(f"Error processing notebook {notebook.topic}: {str(e)}")
                     continue
 
-            if not notebook_list:
+            if not saved_files:
                 return jsonify({'status': 'error', 'message': 'Failed to save any notebooks'}), 500
 
-            return jsonify(notebook_list)
+            return jsonify({
+                'status': 'success',
+                'message': 'Notebooks downloaded successfully',
+                'saved_files': saved_files,
+                'download_path': str(downloads_path)
+            })
 
     except Exception as e:
         return jsonify({'status': 'error', 'message': f'Failed to download notebooks: {str(e)}'}), 500
+
+# app.py - Add new route after existing status endpoints
+@app.route('/process', methods=['GET'])
+@token_required
+def check_process_status(current_user):
+    status = get_processing_status().get(current_user.id, "processing")
+    return jsonify({
+        'status': status
+    })
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)
