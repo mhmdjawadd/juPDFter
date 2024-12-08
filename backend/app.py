@@ -1,25 +1,35 @@
 from flask import Flask, request, jsonify
-import datetime
+import datetime , jwt , os
 from functools import wraps
 from database import *
 from models import *
 from services import *
 from werkzeug.security import check_password_hash, generate_password_hash
 from pathlib import Path
-
-import jwt 
 from jwt import encode , decode 
 from flask_cors import CORS
 
 
-app = Flask(__name__)
-CORS(app)
-app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+ALLOWED_EXTENSIONS={'pdf','docx','txt'}
+
 api_key = "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"  
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'jpdfter-rocks'  # Change this!
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Adjust the origin as needed
 
 # Initialize tables in the database
 with app.app_context():
-    print("Initializing database from app.py")
     init_db(True)
 
 # JWT token required decorator
@@ -130,34 +140,45 @@ def login():
     'message': 'Could not verify'
 }), 401
 
+
+
 # File upload and notebook creation route
 @app.route('/upload', methods=['POST'])
 @token_required
-def upload_file_and_create_notebooks(current_user):
+def create_notebooks(current_user):
     if 'file' not in request.files:
         return jsonify({'error': 'No file part'}), 400
 
     file = request.files['file']
     if file.filename == '':
         return jsonify({'status': 'error', 'message': 'No selected file'}), 400
+    if file and allowed_file(file.filename):
+        try:
+            # Process the file directly
+            processor = FileProcessorService()
+            processed_content = processor.process_file(file)
 
-    try:
-        # Process the file directly
-        processor = FileProcessorService()
-        processed_content = processor.process_file(file)
+            # Initialize ChatGPT API and process content
+            with get_db_context() as db:
+                chatgpt = ChatGPTAPIService(api_key, current_user.id, db)
+                response = chatgpt.create_notebooks(processed_content)
 
-        # Initialize ChatGPT API and process content
-        with get_db_context() as db:
-            chatgpt = ChatGPTAPIService(api_key, current_user.id, db)
-            response = chatgpt.create_notebooks(processed_content)
+                if response['status'] == 'success':
+                    # If notebook creation succeeds, retrieve all notebooks
+                    notebooks = db.query(Notebook).filter(Notebook.user_id == current_user.id).all()
+                    notebook_data = [
+                        {'id': nb.id, 'topic': nb.topic, 'content': nb.content} for nb in notebooks
+                    ]
+                    return jsonify({
+                        'status': 'success',
+                        'message': 'Notebooks created and retrieved successfully',
+                        'notebooks': notebook_data
+                    }), 200
+                else:
+                    return jsonify(response), response.status_code
 
-            if response['status'] == 'success':
-                return jsonify(response), 200
-            else:
-                return jsonify(response), 500
-
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': f'Failed to process file: {str(e)}'}), 500
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': f'Failed to process file: {str(e)}'}), 500
 
 # Route to get notebooks
 @app.route('/notebooks', methods=['GET'])
