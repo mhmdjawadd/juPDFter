@@ -31,7 +31,7 @@ CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})  # Adjust the
 
 # Initialize tables in the database
 with app.app_context():
-    init_db(True)
+    init_db()
 # Add global variable to track processing status
 def get_processing_status():
     if not hasattr(current_app, 'processing_status'):

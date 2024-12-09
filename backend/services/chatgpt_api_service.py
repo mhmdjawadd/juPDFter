@@ -150,8 +150,43 @@ class ChatGPTAPIService:
                 "status": "success",
                 "content": notebook_json
             }
+        except(json.JSONDecodeError)  as e  :
+            content_prompt=(f"i had a problem with this JSONdecode error with this error {str(e)} for this file, please fix it {json_content}")
+            response = self._send_to_api("", content_prompt)
+            if response["status"] == "error":
+                return response
 
-        except (KeyError, IndexError, json.JSONDecodeError,requests.exceptions.RequestException) as e:
+            try:
+                subtopic_content = response["response"]["choices"][0]["message"]["content"]
+                if not subtopic_content:
+                    return {
+                        "status": "error",
+                        "message": f"API returned empty content for subtopic '{subtopic}'."
+                    }
+                
+                
+                # Extract JSON content between ```json and ```
+                match = re.search(r'```json(.*?)```', subtopic_content, re.DOTALL)
+                if match:
+                    json_content = match.group(1).strip()
+                else:
+                    return {
+                        "status": "error",
+                        "message": "Failed to extract JSON content from the response."
+                    }
+
+                notebook_json = json.loads(json_content)
+                return {
+                    "status": "success",
+                    "content": notebook_json
+                }
+            except (KeyError, IndexError,requests.exceptions.RequestException) as e:
+                exception_type = type(e).__name__
+                return {
+                    "status": "error",
+                    "message": f"Failed to extract content for subtopic due to a {exception_type} : {str(e)}"
+                }
+        except (KeyError, IndexError,requests.exceptions.RequestException) as e:
             exception_type = type(e).__name__
             return {
                 "status": "error",
