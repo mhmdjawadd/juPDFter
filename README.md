@@ -45,3 +45,7 @@ backend app:
 frontend:
   on a seperate terminal navigate and open the frontend folder
   start react app : npm start
+
+Note:
+both the backend and frontend have sample test such as test_app.py that will help troubleshoot any problem. Happy testing!
+
